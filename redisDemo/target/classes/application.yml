@@ -1,0 +1,23 @@
+server:
+  port: 8888
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    joda-date-time-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  http:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password:
+
+logging:
+  config: classpath:config/logback.xml

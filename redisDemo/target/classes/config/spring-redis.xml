@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!-- reids配置文件 -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="10" /> <!--    -->
+        <property name="maxIdle" value="3" /> <!-- 最大分配的对象数 -->
+        <property name="maxWaitMillis" value="3000" />
+        <property name="testOnBorrow" value="true" /> <!-- 当调用borrow Object方法时，是否进行有效性检查 -->
+    </bean>
+
+    <bean id="jedisConnFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="poolConfig" ref="jedisPoolConfig"/>
+        <property name="hostName" value="127.0.0.1" />
+        <property name="port" value="6379" />
+        <property name="password" value="" />
+        <property name="timeout" value="3000" />
+        <property name="database" value="0" />
+        <property name="usePool" value="true"/>
+    </bean>
+
+    <bean id="redisTemplate" name="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnFactory"/>
+        <!-- 如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，那么会提示错误 can't cast to String！！！-->
+       <!-- <property name="keySerializer">
+            &lt;!&ndash;对key的默认序列化器。默认值是StringSerializer&ndash;&gt;
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        &lt;!&ndash;是对value的默认序列化器，默认值是取自DefaultSerializer的JdkSerializationRedisSerializer。&ndash;&gt;
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
+        </property>
+        &lt;!&ndash;存储Map时key需要的序列化配置&ndash;&gt;
+        <property name="hashKeySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        &lt;!&ndash;存储Map时value需要的序列化配置&ndash;&gt;
+        <property name="hashValueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
+        </property>-->
+    </bean>
+</beans>
