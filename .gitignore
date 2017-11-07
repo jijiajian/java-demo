@@ -1,5 +1,3 @@
-target/*
-.idea/*
+target/
+.idea/
 *.class
-target/*.xml
-target/*.yml
