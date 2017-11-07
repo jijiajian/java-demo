@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>cn.jijiajian</groupId>
-	<artifactId>j-db-tool</artifactId>
+	<artifactId>j-redis-demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>j-db-tool</name>
+	<name>j-redis-demo</name>
 	<description>Demo project for Spring Boot</description>
 
 	<parent>
