@@ -7,10 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -29,18 +26,16 @@ public class RedisUtil<T> {
     private RedisTemplate<String, T> redisTemplate;
 
 
-
-
-    public void set(String key,T t){
+    public void set(String key, T t) {
         Object getT = this.get(key);
         //若取出第一个数据有效且类型不一致
         if (getT != null && !getT.getClass().isInstance(t)) {
             throw new ClassCastException("原来存放的数据类型的不一致," + t.getClass().getName() + " => " + getT.getClass().getName());
         }
-        redisTemplate.opsForValue().set(key,t);
+        redisTemplate.opsForValue().set(key, t);
     }
 
-    public T get(String key){
+    public T get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -67,9 +62,9 @@ public class RedisUtil<T> {
         return redisTemplate.opsForList().range(key, 0, -1);
     }
 
-    public Long addList(String key, T t) {
+    public Long addItemToList(String key, T t) {
 
-        if (this.isOccupied(key, DataType.LIST)) {
+        if (this.isOccupiedByOtherType(key, DataType.LIST)) {
             throw new RuntimeException("该key已被非List类型占用");
         }
 
@@ -83,33 +78,68 @@ public class RedisUtil<T> {
         return redisTemplate.opsForList().rightPush(key, t);
     }
 
-    /**
-     * 放入实体
-     *
-     * @param key key
-     * @param id  id
-     * @param t   实体
-     */
-    public void putEntity(String key, Number id, T t) {
-        if (this.isOccupied(key, DataType.HASH)) {
+
+    public void putMap(String mapKey, Map map) {
+        if (this.isOccupiedByOtherType(mapKey, DataType.HASH)) {
             throw new RuntimeException("该key已被非Map类型占用");
         }
-
-        String entityKey = this.generateKey(t.getClass(), id);
-        redisTemplate.opsForHash().put(key, entityKey, t);
+        redisTemplate.opsForHash().putAll(mapKey, map);
     }
 
     /**
-     * 取出实体
+     * 放入Map
      *
-     * @param key 实体集合key
-     * @param id  实体id
-     * @return 实体
+     * @param key   key
+     * @param value value
      */
-    @SuppressWarnings("unchecked")
-    public T getEntity(String key, Number id, Class clazz) throws ClassCastException {
-        String entityKey = this.generateKey(clazz, id);
-        return (T) redisTemplate.opsForHash().get(key, entityKey);
+    public void putMapValue(String mapKey, String key, Object value) {
+        if (this.isOccupiedByOtherType(mapKey, DataType.HASH)) {
+            throw new RuntimeException("该key已被非Map类型占用");
+        }
+        redisTemplate.opsForHash().put(mapKey, key, value);
+    }
+
+    /**
+     * 取出Map的某个属性
+     *
+     * @param mapKey mapKey
+     * @param key    属性key
+     * @return 属性value
+     */
+    public Object getMapValue(String mapKey, String key) {
+        return redisTemplate.opsForHash().get(mapKey, key);
+    }
+
+    public Map getMap(String mapKey) {
+        return redisTemplate.opsForHash().entries(mapKey);
+    }
+
+
+    /**
+     * 根据前缀取map
+     * @param prefix 前缀
+     * @return map列表
+     */
+    public List<Map> getMapByPrefix(String prefix) {
+        Set<String> keySet = redisTemplate.keys(prefix + "*");
+        int size = keySet.size();
+        if (size == 0) {
+            return Collections.emptyList();
+        }
+
+        List<Map> result = new ArrayList<>(size);
+        for (String item : keySet) {
+            if (this.isOccupiedByOtherType(item, DataType.HASH)) {
+                continue;
+            }
+
+            Map getMap = this.getMap(item);
+            if (getMap != null) {
+                result.add(getMap);
+            }
+
+        }
+        return result;
     }
 
 
@@ -120,7 +150,7 @@ public class RedisUtil<T> {
      * @param prefix 实体key 前缀
      * @return
      */
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
     public List<T> getEntitiesByPrefix(String key, String prefix) {
         Map<Object, Object> all = redisTemplate.opsForHash().entries(key);
         if (all.size() == 0) {
@@ -135,7 +165,7 @@ public class RedisUtil<T> {
             }
         }
         return result;
-    }
+    }*/
 
     /**
      * 删除同一前缀的实体
@@ -144,7 +174,7 @@ public class RedisUtil<T> {
      * @param prefix 实体key 前缀
      * @return 删除条数
      */
-    public int deleteEntitiesByPrefix(String key, String prefix) {
+    /*public int deleteEntitiesByPrefix(String key, String prefix) {
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
         Map<Object, Object> all = hashOperations.entries(key);
         if (all.size() == 0) {
@@ -159,7 +189,7 @@ public class RedisUtil<T> {
             }
         }
         return count;
-    }
+    }*/
 
     /**
      * 实体key 为实体名 + id
@@ -175,11 +205,12 @@ public class RedisUtil<T> {
 
     /**
      * 检查key是否被其他类型的数据占用
-     * @param key  key
-     * @param dataType  数据类型
+     *
+     * @param key      key
+     * @param dataType 预期的数据类型
      * @return true 被其他类型占用  false未被其它类型占用
      */
-    private boolean isOccupied(String key, DataType dataType) {
+    private boolean isOccupiedByOtherType(String key, DataType dataType) {
         if (redisTemplate.hasKey(key)) {
             //若该key的类型为非dataType类型
             if (!redisTemplate.type(key).equals(dataType)) {
