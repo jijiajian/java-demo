@@ -58,11 +58,26 @@ public class RedisUtil<T> {
         redisTemplate.opsForList().rightPushAll(key, tList);
     }
 
+    /**
+     * 获取列表
+     * @param key
+     * @return
+     */
     public List<T> getList(String key) {
         return redisTemplate.opsForList().range(key, 0, -1);
     }
 
+<<<<<<< HEAD
     public Long addItemToList(String key, T t) {
+=======
+    /**
+     *
+     * @param key
+     * @param t
+     * @return
+     */
+    public Long addList(String key, T t) {
+>>>>>>> 2a8f73c1253b6dcb29f7974c9738fc8416e5f9ad
 
         if (this.isOccupiedByOtherType(key, DataType.LIST)) {
             throw new RuntimeException("该key已被非List类型占用");
