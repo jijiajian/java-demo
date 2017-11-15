@@ -63,10 +63,21 @@ public class RedisUtil<T> {
         redisTemplate.opsForList().rightPushAll(key, tList);
     }
 
+    /**
+     * 获取列表
+     * @param key
+     * @return
+     */
     public List<T> getList(String key) {
         return redisTemplate.opsForList().range(key, 0, -1);
     }
 
+    /**
+     *
+     * @param key
+     * @param t
+     * @return
+     */
     public Long addList(String key, T t) {
 
         if (this.isOccupied(key, DataType.LIST)) {
