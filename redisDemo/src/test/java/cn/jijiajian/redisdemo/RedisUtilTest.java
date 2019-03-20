@@ -21,10 +21,8 @@ import java.util.List;
 public class RedisUtilTest {
 
     @Autowired
-    private RedisUtil<DemoEntity> redisUtil;
+    private RedisUtils redisUtils;
 
-    @Autowired
-    private RedisUtil<String> stringRedisUtil;
 
     @Test
     public void testListOp() {
@@ -45,18 +43,17 @@ public class RedisUtilTest {
         entityList.add(demoEntity2);
 
         //新建一个列表
-        redisUtil.buildList("demoList", entityList);
+        redisUtils.buildList("demoList", entityList);
 //        stringRedisUtil.addList("demoList","2333");
-        redisUtil.addList("demoList", demoEntity3);
+        redisUtils.addList("demoList", demoEntity3);
 
 
-        List<DemoEntity> entityList1 = redisUtil.getList("demoList");
+        List<DemoEntity> entityList1 = redisUtils.getList("demoList");
         System.out.println(entityList1);
 
 
-        stringRedisUtil.set("demoEntity","eee");
-        redisUtil.set("demoEntity",demoEntity1);
-        System.out.println(redisUtil.get("demoEntity"));
+        redisUtils.set("demoEntity","eee");
+        redisUtils.set("demoEntity",demoEntity1);
 
     }
 }
