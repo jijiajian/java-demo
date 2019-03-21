@@ -16,6 +16,7 @@ public class DemoEntity implements Serializable {
     private Integer age;
     private String address;
     private BigDecimal money;
+    private InnerEntity innerEntity;
 
     public Integer getId() {
         return id;
@@ -55,6 +56,14 @@ public class DemoEntity implements Serializable {
 
     public void setMoney(BigDecimal money) {
         this.money = money;
+    }
+
+    public InnerEntity getInnerEntity() {
+        return innerEntity;
+    }
+
+    public void setInnerEntity(InnerEntity innerEntity) {
+        this.innerEntity = innerEntity;
     }
 
     @Override
